@@ -1,0 +1,181 @@
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+  PolicySchemaVersion="0.3.0.0"
+  TenantId="tnenatname.onmicrosoft.com"
+  PolicyId="B2C_1A_SAML2_signup_signin_SAML"
+  PublicPolicyUri="http://tenantname.onmicrosoft.com/B2C_1A_SAML2_signup_signin_SAML"
+  TenantObjectId="id">
+  <BasePolicy>
+    <TenantId>tenantname.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkExtensionsSAML</PolicyId>
+  </BasePolicy>
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>Token Issuer</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile
+          Id="Saml2AssertionIssuer">
+          <DisplayName>Token Issuer</DisplayName>
+          <Protocol
+            Name="None" />
+          <OutputTokenFormat>SAML2</OutputTokenFormat>
+          <Metadata>
+            <Item
+              Key="IssuerUri">https://tenantname.onmicrosoft.com/OCC_RelayingParty_App</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key
+              Id="MetadataSigning"
+              StorageReferenceId="B2C_1A_SamlIdpCert" />
+            <Key
+              Id="SamlAssertionSigning"
+              StorageReferenceId="B2C_1A_SamlIdpCert" />
+            <Key
+              Id="SamlMessageSigning"
+              StorageReferenceId="B2C_1A_SamlIdpCert" />
+          </CryptographicKeys>
+          <InputClaims />
+          <OutputClaims />
+          <UseTechnicalProfileForSessionManagement
+            ReferenceId="SM-Saml" />
+        </TechnicalProfile>
+        <TechnicalProfile
+          Id="SM-Saml">
+          <DisplayName>Session Management Provider</DisplayName>
+          <Protocol
+            Name="Proprietary"
+            Handler="Web.TPEngine.SSO.SamlSSOSessionProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+  <UserJourneys>
+    <UserJourney
+      Id="SignUpOrSigninSAML">
+      <OrchestrationSteps>
+        <OrchestrationStep
+          Order="1"
+          Type="CombinedSignInAndSignUp"
+          ContentDefinitionReferenceId="api.signuporsignin">
+          <ClaimsProviderSelections>
+            <ClaimsProviderSelection
+              ValidationClaimsExchangeId="LocalAccountSigninEmailExchange" />
+          </ClaimsProviderSelections>
+          <ClaimsExchanges>
+            <ClaimsExchange
+              Id="LocalAccountSigninEmailExchange"
+              TechnicalProfileReferenceId="SelfAsserted-LocalAccountSignin-Email" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep
+          Order="2"
+          Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition
+              Type="ClaimsExist"
+              ExecuteActionsIf="true">
+              <Value>objectId</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange
+              Id="SignUpWithLogonEmailExchange"
+              TechnicalProfileReferenceId="LocalAccountSignUpWithLogonEmail" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep
+          Order="3"
+          Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition
+              Type="ClaimsExist"
+              ExecuteActionsIf="true">
+              <Value>objectId</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange
+              Id="SelfAsserted-Social"
+              TechnicalProfileReferenceId="SelfAsserted-Social" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep
+          Order="4"
+          Type="ClaimsExchange">
+          <Preconditions>
+            <Precondition
+              Type="ClaimEquals"
+              ExecuteActionsIf="true">
+              <Value>authenticationSource</Value>
+              <Value>socialIdpAuthentication</Value>
+              <Action>SkipThisOrchestrationStep</Action>
+            </Precondition>
+          </Preconditions>
+          <ClaimsExchanges>
+            <ClaimsExchange
+              Id="AADUserReadWithObjectId"
+              TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+          </ClaimsExchanges>
+        </OrchestrationStep>
+        <OrchestrationStep
+          Order="5"
+          Type="SendClaims"
+          CpimIssuerTechnicalProfileReferenceId="Saml2AssertionIssuer" />
+      </OrchestrationSteps>
+      <ClientDefinition
+        ReferenceId="DefaultWeb" />
+    </UserJourney>
+  </UserJourneys>
+  <RelyingParty>
+    <DefaultUserJourney
+      ReferenceId="SignUpOrSigninSAML" />
+    <TechnicalProfile
+      Id="PolicyProfile">
+      <DisplayName>PolicyProfile</DisplayName>
+      <Protocol
+        Name="SAML2" />
+      <Metadata>
+        <Item Key="PartnerEntity"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+          <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" 
+          entityID="https://url-store.occa.ocs.oraclecloud.com/eol">
+          <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+          <md:KeyDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" use="encryption">
+          <dsig:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
+          <dsig:X509Data><dsig:X509Certificate>MIIDVTCCAj2gAwIBAgIEdLPSbDANBgkqhkiG9w0BAQsFADAOMQwwCgYDVQQDEwNvcHMwHhcNMjAwOTI2MTU1MTI4WhcNMjEwOTI2MTU1MTI4WjCBhjEWMBQGA1UEAxMNYTE0NTAzODljMURFVjEWMBQGA1UECxMNYTE0NTAzODljMURFVjEbMBkGA1UEChMST3JhY2xlIENvcnBvcmF0aW9uMRUwEwYDVQQHEwxSZWR3b29kIENpdHkxEzARBgNVBAgTCkNhbGlmb3JuaWExCzAJBgNVBAYTAlVTMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjkV3RzOZmyZ/x++jG/xVmti1m03OvkuOz8g/qlb7G/TD4cd8LNIM+DTIPGBnSFo27NBEXCYtbjvith+ljfvt71brmE4uQ83CBbH9mLjYnRmo63MoB+2u6ifamJRs6w3GITWa+IwitqylfjJ8MHl91J0cZYhEynW4d1g8QtM0pFZyIhxv7IydrL+uWSWKH0/X9nyvbNxLrnkZB5TRsi3jJK6yPcW1xO3+qOSFm+c2lhq8Q+U3Jk9WgXo/tnjM6fJP8EmLQHwcFIEFmcbmWfnKgZTvtPvXcnkrJG9RSrp+wppVP2TgUtrDbywSZ82V0MCugSp1uADKazq+E7+hF5G4vwIDAQABo0IwQDAfBgNVHSMEGDAWgBTfCpO30fFmi+OV/07gHZ0vB30HNDAdBgNVHQ4EFgQUtoRAVYW+UvFR15DzaiWCKu5NYkIwDQYJKoZIhvcNAQELBQADggEBAHZowQSf7B5XO7EgwQkK66UBe5/uQjtjRNMtGA/nlFWZ3pH3X4c8gmAc2/e/+qTNIqCBpsYth3XkxJTOsUC86oFrM83zgbkISXBUuHFCBrF31m9Wt4aLzjaYmU6Jet6SMxZSrpIjphIH0RQgDKUXhyw2WccsVJMDFsQuRVnoaC+O9NyZTwicYxBN2X1rg/oRlgMsOuiwEfdy6CY58ouI4TffIYqQLUmcCjFv07KsnZEO+xiTuYZ1XqcPkjm0iuvX2WtPBLKku56etge6z7Ug6Ssy0bV7LCij/YG5Ig46XhsgkETF4/v1/EOlAQhzBlOETLPpZBG42Vh9Vo1u2+7wm3o=</dsig:X509Certificate><dsig:X509IssuerSerial><dsig:X509IssuerName>CN=ops</dsig:X509IssuerName><dsig:X509SerialNumber>1957941868</dsig:X509SerialNumber>
+          </dsig:X509IssuerSerial><dsig:X509SubjectName>C=US, ST=California, L=Redwood City, O=Oracle Corporation, OU=a1450389c1DEV, CN=a1450389c1DEV</dsig:X509SubjectName>
+          <dsig:X509SKI>toRAVYW+UvFR15DzaiWCKu5NYkI=</dsig:X509SKI></dsig:X509Data>
+          </dsig:KeyInfo></md:KeyDescriptor>
+          <md:KeyDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" use="signing">
+          <dsig:KeyInfo xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
+          <dsig:X509Data><dsig:X509Certificate>MIIDVTCCAj2gAwIBAgIEdLPSbDANBgkqhkiG9w0BAQsFADAOMQwwCgYDVQQDEwNvcHMwHhcNMjAwOTI2MTU1MTI4WhcNMjEwOTI2MTU1MTI4WjCBhjEWMBQGA1UEAxMNYTE0NTAzODljMURFVjEWMBQGA1UECxMNYTE0NTAzODljMURFVjEbMBkGA1UEChMST3JhY2xlIENvcnBvcmF0aW9uMRUwEwYDVQQHEwxSZWR3b29kIENpdHkxEzARBgNVBAgTCkNhbGlmb3JuaWExCzAJBgNVBAYTAlVTMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjkV3RzOZmyZ/x++jG/xVmti1m03OvkuOz8g/qlb7G/TD4cd8LNIM+DTIPGBnSFo27NBEXCYtbjvith+ljfvt71brmE4uQ83CBbH9mLjYnRmo63MoB+2u6ifamJRs6w3GITWa+IwitqylfjJ8MHl91J0cZYhEynW4d1g8QtM0pFZyIhxv7IydrL+uWSWKH0/X9nyvbNxLrnkZB5TRsi3jJK6yPcW1xO3+qOSFm+c2lhq8Q+U3Jk9WgXo/tnjM6fJP8EmLQHwcFIEFmcbmWfnKgZTvtPvXcnkrJG9RSrp+wppVP2TgUtrDbywSZ82V0MCugSp1uADKazq+E7+hF5G4vwIDAQABo0IwQDAfBgNVHSMEGDAWgBTfCpO30fFmi+OV/07gHZ0vB30HNDAdBgNVHQ4EFgQUtoRAVYW+UvFR15DzaiWCKu5NYkIwDQYJKoZIhvcNAQELBQADggEBAHZowQSf7B5XO7EgwQkK66UBe5/uQjtjRNMtGA/nlFWZ3pH3X4c8gmAc2/e/+qTNIqCBpsYth3XkxJTOsUC86oFrM83zgbkISXBUuHFCBrF31m9Wt4aLzjaYmU6Jet6SMxZSrpIjphIH0RQgDKUXhyw2WccsVJMDFsQuRVnoaC+O9NyZTwicYxBN2X1rg/oRlgMsOuiwEfdy6CY58ouI4TffIYqQLUmcCjFv07KsnZEO+xiTuYZ1XqcPkjm0iuvX2WtPBLKku56etge6z7Ug6Ssy0bV7LCij/YG5Ig46XhsgkETF4/v1/EOlAQhzBlOETLPpZBG42Vh9Vo1u2+7wm3o=</dsig:X509Certificate><dsig:X509IssuerSerial><dsig:X509IssuerName>CN=ops</dsig:X509IssuerName>
+          <dsig:X509SerialNumber>1957941868</dsig:X509SerialNumber></dsig:X509IssuerSerial>
+          <dsig:X509SubjectName>C=US, ST=California, L=Redwood City, O=Oracle Corporation, OU=a1450389c1DEV, CN=a1450389c1DEV</dsig:X509SubjectName><dsig:X509SKI>toRAVYW+UvFR15DzaiWCKu5NYkI=</dsig:X509SKI></dsig:X509Data></dsig:KeyInfo></md:KeyDescriptor>
+          <md:NameIDFormat xmlns="urn:oasis:names:tc:SAML:2.0:metadata">urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+          <md:AssertionConsumerService xmlns="urn:oasis:names:tc:SAML:2.0:metadata" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+           Location="https://url-store.occa.ocs.oraclecloud.com/eol/SAML/post" index="1" isDefault="true"/>
+           </md:SPSSODescriptor></md:EntityDescriptor>]]>
+           </Item>
+      </Metadata>
+      <OutputClaims>
+        <OutputClaim
+          ClaimTypeReferenceId="displayName" />
+        <OutputClaim
+          ClaimTypeReferenceId="givenName" />
+        <OutputClaim
+          ClaimTypeReferenceId="surname" />
+        <OutputClaim
+          ClaimTypeReferenceId="signInNames.emailAddress" PartnerClaimType="loginAttributeName" />
+        <OutputClaim
+          ClaimTypeReferenceId="identityProvider" DefaultValue="" />
+        <OutputClaim
+          ClaimTypeReferenceId="objectId"
+          PartnerClaimType="objectId" />
+      </OutputClaims>
+      <SubjectNamingInfo
+        ClaimType="loginAttributeName"
+        Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" />
+    </TechnicalProfile>
+  </RelyingParty>
+</TrustFrameworkPolicy>
